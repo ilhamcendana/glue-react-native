@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Alert, Animated, Dimensions, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, YellowBox, Alert, Animated, Dimensions, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Text, Button, Image, Avatar } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/Feather';
 import firebase from 'react-native-firebase';
@@ -9,7 +9,8 @@ import HOMESTYLES from './HOMESTYLE';
 
 export default Home = ({ navigation }) => {
     useEffect(() => {
-        // fetchPost();
+        fetchPost();
+        YellowBox.ignoreWarnings(['Remote debugger']);
     }, []);
 
     const { navigate } = navigation;
@@ -162,10 +163,12 @@ export default Home = ({ navigation }) => {
                     opacity: textOpacity,
                     transform: [{ translateY: textTranslate }]
                 }}>
-                    <Avatar
-                        rounded
-                        source={require('../../../assets/profileIcon.png')}
-                    />
+                    <TouchableOpacity onPress={() => navigate('Profile')}>
+                        <Avatar
+                            rounded
+                            source={require('../../../assets/profileIcon.png')}
+                        />
+                    </TouchableOpacity>
                     <Text style={{ fontSize: 15, fontWeight: '100', color: '#fff' }}>Home</Text>
                 </Animated.View>
 
@@ -199,12 +202,14 @@ export default Home = ({ navigation }) => {
                             />
                         }
                     />
-                    <Avatar
-                        size='small'
-                        rounded
-                        source={require('../../../assets/profileIcon.png')}
-                        containerStyle={{ marginHorizontal: 10 }}
-                    />
+                    <TouchableOpacity onPress={() => navigate('Profile')}>
+                        <Avatar
+                            size='small'
+                            rounded
+                            source={require('../../../assets/profileIcon.png')}
+                            containerStyle={{ marginHorizontal: 10 }}
+                        />
+                    </TouchableOpacity>
                     <Button
                         type='clear'
                         icon={
@@ -230,7 +235,7 @@ export default Home = ({ navigation }) => {
             </Animated.View>
 
             <FlatList
-                data={post.allPost}
+                data={post.allPost.reverse()}
                 onScroll={Animated.event(
                     [{ nativeEvent: { contentOffset: { y: posScroll } } }]
                 )}
@@ -241,7 +246,7 @@ export default Home = ({ navigation }) => {
                 }}
                 ListFooterComponent={isLoading}
                 renderItem={({ item, index }) => (
-                    <View style={HOMESTYLES.card}>
+                    <View style={HOMESTYLES.card} key={item.key}>
                         <View style={HOMESTYLES.user}>
                             <View style={{
                                 flexDirection: 'row', alignItems: 'center',

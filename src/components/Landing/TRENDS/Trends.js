@@ -26,11 +26,7 @@ export default Home = (props) => {
         setLoading(true);
         fetch('https://us-central1-forumpengaduan.cloudfunctions.net/getTrendsPosts')
             .then(res => res.json())
-            .then(resjson => setPost(prev => {
-                let data = { ...prev };
-                data.trendsPost = resjson;
-                return data;
-            }))
+            .then(resjson => console.log(resjson))
             .then(() => {
                 setRefreshing(false);
                 setLoading(false);
@@ -39,6 +35,8 @@ export default Home = (props) => {
                 setLoading(false);
                 Alert.alert('ERROR', err.message);
             })
+
+        console.log(post.trendsPost);
     };
 
     const morePressed = (uid, index) => {

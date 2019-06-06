@@ -24,7 +24,7 @@ export default OpenedImage = ({ navigation }) => {
             }}>
                 <Button
                     type='clear'
-                    onPress={() => navigation.navigate('Feed')}
+                    onPress={() => navigation.goBack()}
                     icon={
                         <Icon name='arrow-left' color='#fff' size={25} />
                     }

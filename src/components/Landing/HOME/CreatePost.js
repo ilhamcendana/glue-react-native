@@ -1,12 +1,35 @@
-import React, { useState } from 'react';
-import { View, TextInput, KeyboardAvoidingView, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, TextInput, KeyboardAvoidingView, ScrollView, TouchableOpacity, Picker } from 'react-native';
 import { Text, Button, Image, Badge, } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/Feather';
 import ImagePicker from 'react-native-image-crop-picker';
+import { CONTEXT } from '../../Context';
 
 export default CreatePost = ({ navigation }) => {
-    const [inputPost, setInputPost] = useState('');
-    const [imgPost, setImgPost] = useState('');
+    const [post, setPost] = useContext(CONTEXT);
+    const [inputPost, setInputPost] = useState({
+        nama: '',
+        profilePict: '',
+        caption: '',
+        postImg: '',
+        category: '',
+        totalUpVote: 0,
+        postInfo: {
+            totalComments: 0,
+            totalReported: 0
+        },
+        key: '',
+        uid: '',
+        userWhoLiked: {}
+    });
+
+    const POSTING = () => {
+        const data = post.allPost;
+        const newData = [...data, inputPost]
+        setPost(newData);
+        navigation.navigate('Feed');
+    };
+
     return (
         <View style={{
             flex: 1
@@ -39,9 +62,9 @@ export default CreatePost = ({ navigation }) => {
                 }}>GLUE</Text>
 
                 <Button
-                    disabled={inputPost !== '' ? false : true}
+                    disabled={inputPost.caption !== '' ? false : true}
                     type='clear'
-                    onPress={() => navigation.navigate('Feed')}
+                    onPress={POSTING}
                     icon={
                         <Icon name='send' color='#fff' size={25} />
                     }
@@ -56,61 +79,77 @@ export default CreatePost = ({ navigation }) => {
                         paddingVertical: 20
                     }}>
                         <View style={{
-                            flexDirection: 'row'
+                            flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
                         }}>
-                            <Button
-                                raised
-                                onPress={() => {
-                                    ImagePicker.openCamera({
-                                        width: 300,
-                                        height: 400,
-                                        cropping: true,
-                                    })
-                                        .then(image => {
-                                            setImgPost(image.path);
+                            <View style={{ flexDirection: 'row' }}>
+                                <Button
+                                    onPress={() => {
+                                        ImagePicker.openCamera({
+                                            width: 300,
+                                            height: 400,
+                                            cropping: false,
                                         })
-                                        .catch(err => console.log(err))
-                                }}
-                                icon={
-                                    <Icon name='camera' color='#fff' size={25} />
-                                }
-                                buttonStyle={{ marginRight: 5 }}
-                            />
-                            <Button
-                                raised
-                                onPress={() => {
-                                    ImagePicker.openPicker({
-                                        width: 300,
-                                        height: 400,
-                                        cropping: true
-                                    })
-                                        .then(image => {
-                                            setImgPost(image.path);
+                                            .then(image => {
+                                                setInputPost({ ...inputPost, postImg: image.path })
+                                            })
+                                            .catch(err => console.log(err))
+                                    }}
+                                    icon={
+                                        <Icon name='camera' color='#fff' size={25} />
+                                    }
+                                    buttonStyle={{ marginRight: 5 }}
+                                />
+                                <Button
+                                    onPress={() => {
+                                        ImagePicker.openPicker({
+                                            width: 300,
+                                            height: 400,
+                                            cropping: false,
                                         })
-                                        .catch(err => console.log(err))
+                                            .then(image => {
+                                                setInputPost({ ...inputPost, postImg: image.path });
+                                            })
+                                            .catch(err => console.log(err))
+                                    }}
+                                    icon={
+                                        <Icon name='image' color='#fff' size={25} />
+                                    }
+                                />
+                            </View>
+
+                            <Picker
+                                style={{
+                                    borderBottomWidth: 4, height: 30, width: '45%',
+                                    borderBottomColor: 'red', backgroundColor: '#4388d6', borderRadius: 20,
+                                    color: '#fff'
                                 }}
-                                icon={
-                                    <Icon name='image' color='#fff' size={25} />
-                                }
-                            />
+                                mode='dialog'
+                                selectedValue={inputPost.category}
+                                onValueChange={e => setInputPost({ ...inputPost, category: e })}
+                            >
+                                <Picker.Item label='Kategori' value='' />
+                                <Picker.Item label='Info' value='Info' />
+                                <Picker.Item label='Fasilitas' value='Fasilitas' />
+                                <Picker.Item label='Sosial' value='Sosial' />
+                            </Picker>
                         </View>
 
                         <TextInput
                             autoFocus={true}
-                            value={inputPost}
-                            onChangeText={e => setInputPost(e)}
+                            value={inputPost.caption}
+                            onChangeText={e => setInputPost({ ...inputPost, caption: e })}
                             placeholder='Ketik post'
                             multiline={true}
                             style={{
                                 borderBottomWidth: 1 / 2,
-                                borderColor: inputPost !== '' ? '#4388d6' : '#666',
+                                borderColor: inputPost.caption !== '' ? '#4388d6' : '#666',
                                 marginBottom: 20
                             }}
                         />
 
-                        {imgPost !== '' ? <View>
+                        {inputPost.postImg !== '' ? <View>
                             <TouchableOpacity
-                                onPress={() => setImgPost('')}
+                                onPress={() => setInputPost({ postImg: '' })}
                                 style={{
                                     backgroundColor: 'red', width: 40,
                                     height: 40, borderRadius: 40 / 2, justifyContent: 'center', alignItems: 'center',
@@ -119,7 +158,7 @@ export default CreatePost = ({ navigation }) => {
                                 <Icon name='x' size={25} color='#fff' />
                             </TouchableOpacity>
 
-                            <Image source={{ uri: imgPost }} style={{
+                            <Image source={{ uri: inputPost.postImg }} style={{
                                 width: '100%',
                                 height: 300,
                             }} />

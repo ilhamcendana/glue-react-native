@@ -10,6 +10,7 @@ import OpenedImage from './OpenedImage';
 import CreatePost from './CreatePost';
 import Trends from '../TRENDS/Trends';
 import Notification from '../NOTIFICATION/Notification';
+import Profile from '../PROFILE/Profile';
 
 const HomeStack = createStackNavigator({
     Feed: { screen: Home },
@@ -17,11 +18,13 @@ const HomeStack = createStackNavigator({
     OpenedImage: { screen: OpenedImage },
     CreatePost: { screen: CreatePost },
     Trends: { screen: Trends },
-    Notification: { screen: Notification }
+    Notification: { screen: Notification },
+    Profile: { screen: Profile }
 },
     {
         defaultNavigationOptions: {
-            header: null
+            header: null,
+
         }
     }
 );
