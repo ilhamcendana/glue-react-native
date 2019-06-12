@@ -10,10 +10,15 @@ export const AuthStyles = StyleSheet.create({
     },
     title: {
         alignSelf: 'center',
-        marginVertical: 20
+        marginVertical: 20,
+        color: '#4388d6'
     },
     formLogin: {
         alignSelf: 'center',
-        width: '80%'
+        width: '80%',
+    },
+    formLogout: {
+        alignSelf: 'center',
+        width: screenWidth,
     },
 });

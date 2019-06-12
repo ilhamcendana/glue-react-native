@@ -1,35 +1,124 @@
-import React, { useState, useContext } from 'react';
-import { View, TextInput, KeyboardAvoidingView, ScrollView, TouchableOpacity, Picker } from 'react-native';
+import React, { useState, useContext, useEffect } from 'react';
+import { View, Alert, TextInput, ActivityIndicator, KeyboardAvoidingView, ScrollView, TouchableOpacity, Picker } from 'react-native';
 import { Text, Button, Image, Badge, } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/Feather';
 import ImagePicker from 'react-native-image-crop-picker';
 import { CONTEXT } from '../../Context';
+import firebase from 'react-native-firebase';
 
 export default CreatePost = ({ navigation }) => {
+    useEffect(() => {
+        profileData();
+    }, []);
+
+    const { uid, displayName } = firebase.auth().currentUser;
+    const profileData = () => {
+        firebase.firestore().collection('users').doc(uid).get().then(snap => {
+            setInputPost({ ...inputPost, profilePict: snap.data().profile.profilePict });
+        })
+    }
+
+    const date = new Date();
+    const year = date.getFullYear().toString();
+    const month = date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1;
+    const day = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
+    const hour = date.getHours() < 10 ? `0${date.getHours()}` : date.getHours();
+    const minutes = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
+    const second = date.getSeconds() < 10 ? `0${date.getSeconds()}` : date.getSeconds();
+    const merge = `${year}${month}${day}${hour}${minutes}${second}`;
+
     const [post, setPost] = useContext(CONTEXT);
+    const [loadingBtn, setloadingBtn] = useState(false);
+    const [postImg, setPostImg] = useState('');
     const [inputPost, setInputPost] = useState({
-        nama: '',
+        nama: displayName,
         profilePict: '',
         caption: '',
-        postImg: '',
         category: '',
         totalUpVote: 0,
         postInfo: {
             totalComments: 0,
             totalReported: 0
         },
+        mergeDate: merge,
         key: '',
-        uid: '',
-        userWhoLiked: {}
+        uid: uid,
+        userWhoLiked: {},
+        userWhoReported: {}
     });
-
     const POSTING = () => {
-        const data = post.allPost;
-        const newData = [...data, inputPost]
-        setPost(newData);
-        navigation.navigate('Feed');
-    };
+        if (inputPost.category === '') return Alert.alert('INVALID', 'Categori kosong !')
 
+        setloadingBtn(true);
+        if (postImg !== '') {
+            const ref = firebase.storage().ref('POST-PICTURE/' + 'P' + date.getFullYear() + date.getMonth() + date.getDay() + date.getMinutes() + ':' + date.getMilliseconds());
+            ref.putFile(postImg)
+                .then((img) => {
+                    const db = firebase.firestore().collection('posts');
+                    db.add(inputPost)
+                        .then(snap => {
+                            firebase.firestore().collection('posts').doc(snap.id)
+                                .set({
+                                    key: snap.id,
+                                    postPict: img.downloadURL
+                                }, { merge: true })
+                        })
+                    setPostImg(img.downloadURL);
+                })
+                .then(() => {
+                    const ref = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid);
+                    ref.get().then(snap => {
+                        ref.set({
+                            profile: {
+                                totalPost: snap.data().profile.totalPost + 1
+                            }
+                        }, { merge: true })
+                    })
+                })
+                .then(() => {
+                    const data = { ...post };
+                    const newInputPost = inputPost;
+                    newInputPost.postPict = postImg;
+                    data.allPost.unshift(newInputPost);
+                    setPost(data);
+                    setloadingBtn(false);
+                })
+                .then(() => navigation.navigate('Feed'))
+                .catch(err => {
+                    console.log(err);
+                    Alert.alert('Something Wrong', err.message);
+                    setloadingBtn(false);
+                });
+        } else {
+            const db = firebase.firestore().collection('posts');
+            db.add(inputPost)
+                .then(snap => {
+                    firebase.firestore().collection('posts').doc(snap.id)
+                        .set({
+                            key: snap.id
+                        }, { merge: true })
+
+                    setInputPost(prev => {
+                        const newD = prev;
+                        prev.key = snap.id
+                        return newD;
+                    })
+
+                })
+                .then(() => {
+                    const data = { ...post };
+                    data.allPost.unshift(inputPost);
+                    setPost(data);
+                    setloadingBtn(false);
+                })
+                .then(() => navigation.navigate('Feed'))
+                .catch(err => {
+                    console.log(err);
+                    setloadingBtn(false);
+                    Alert.alert('Something Wrong', err.message);
+                });
+        }
+    };
     return (
         <View style={{
             flex: 1
@@ -57,12 +146,12 @@ export default CreatePost = ({ navigation }) => {
                     }
                     buttonStyle={{ marginLeft: 5 }}
                 />
-                <Text style={{
+                {!loadingBtn ? <Text style={{
                     fontSize: 22, fontWeight: 'bold', color: '#fff'
-                }}>GLUE</Text>
+                }}>GLUE</Text> : <ActivityIndicator color='#fff' size='large' />}
 
                 <Button
-                    disabled={inputPost.caption !== '' ? false : true}
+                    disabled={inputPost.caption !== '' ? false : true || loadingBtn ? true : false}
                     type='clear'
                     onPress={POSTING}
                     icon={
@@ -90,7 +179,7 @@ export default CreatePost = ({ navigation }) => {
                                             cropping: false,
                                         })
                                             .then(image => {
-                                                setInputPost({ ...inputPost, postImg: image.path })
+                                                setPostImg(image.path)
                                             })
                                             .catch(err => console.log(err))
                                     }}
@@ -107,7 +196,7 @@ export default CreatePost = ({ navigation }) => {
                                             cropping: false,
                                         })
                                             .then(image => {
-                                                setInputPost({ ...inputPost, postImg: image.path });
+                                                setPostImg(image.path)
                                             })
                                             .catch(err => console.log(err))
                                     }}
@@ -147,9 +236,9 @@ export default CreatePost = ({ navigation }) => {
                             }}
                         />
 
-                        {inputPost.postImg !== '' ? <View>
+                        {postImg !== '' ? <View>
                             <TouchableOpacity
-                                onPress={() => setInputPost({ postImg: '' })}
+                                onPress={() => setPostImg('')}
                                 style={{
                                     backgroundColor: 'red', width: 40,
                                     height: 40, borderRadius: 40 / 2, justifyContent: 'center', alignItems: 'center',
@@ -158,7 +247,7 @@ export default CreatePost = ({ navigation }) => {
                                 <Icon name='x' size={25} color='#fff' />
                             </TouchableOpacity>
 
-                            <Image source={{ uri: inputPost.postImg }} style={{
+                            <Image source={{ uri: postImg }} style={{
                                 width: '100%',
                                 height: 300,
                             }} />

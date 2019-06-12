@@ -4,8 +4,7 @@ export const CONTEXT = createContext();
 
 export const CONTEXT_PROVIDER = (props) => {
     const [post, setPost] = useState({
-        allPost: [],
-        trendsPost: []
+        allPost: []
     });
 
     return (

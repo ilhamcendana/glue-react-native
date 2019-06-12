@@ -1,16 +1,35 @@
 import React, { useState } from 'react';
-import { View, Alert, Animated, Dimensions, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { Text, Button, Image, Avatar } from 'react-native-elements';
+import { View, Animated, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import HOMESTYLES from '../HOME/HOMESTYLE';
+import { Text, Button, Image, Avatar, ListItem } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/Feather';
 import firebase from 'react-native-firebase';
 
-export default Notification = ({ navigation }) => {
-    const { navigate } = navigation;
 
-    const [refreshing, setRefreshing] = useState(false);
-    const [loading, setLoading] = useState(false);
+export default Setting = ({ navigation }) => {
+    const [list] = useState([
+        {
+            title: 'Sunting Profil',
+            icon: 'edit'
+        },
+        {
+            title: 'Info',
+            icon: 'info'
+        },
+        {
+            title: 'Bantuan',
+            icon: 'help-circle'
+        },
+        {
+            title: 'Keluar',
+            icon: 'log-out'
+        },
+    ]);
+
+    const { navigate } = navigation;
     const [activity, setActivity] = useState(false);
-    const [posScroll] = useState(new Animated.Value(0));
+
+    const posScroll = new Animated.Value(0);
     const HEADER_MAX_HEIGHT = 100;
     const HEADER_MIN_HEIGHT = 50;
     const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
@@ -34,31 +53,32 @@ export default Notification = ({ navigation }) => {
         extrapolate: 'clamp',
     });
 
-    const isLoading = () => {
-        if (loading) return <ActivityIndicator animating size='large' style={{ marginTop: 20 }} color='#4388d6' />
-        return null;
-    }
+    const settingEvent = (choosed) => {
+        switch (choosed) {
+            case 'Sunting Profil':
+                navigate('EditProfile')
+                break;
 
-    const notif = [
-        {
-            nama: 'Ilham cendana',
-            profilePict: '',
-            sub: 'Menyukai post anda',
-            time: '3 Jam yang lalu'
-        },
-        {
-            nama: 'Ilham cendana putra',
-            profilePict: '',
-            sub: 'Mengomentari post anda',
-            time: '3 Jam yang lalu'
+            case 'Info':
+                navigate('Info');
+                break;
+
+            case 'Bantuan':
+                navigate('Help');
+                break;
+
+            case 'Keluar':
+                Alert.alert('Keluar dari glue', 'Apakah anda yakin ingin keluar ?', [
+                    { text: 'Tidak' },
+                    { text: 'Ya', onPress: () => firebase.auth().signOut() }
+                ])
+                break;
+
+            default:
         }
-    ]
-
+    }
     return (
-        <View style={{
-            flex: 1,
-            width: screenWidth,
-        }}>
+        <View style={HOMESTYLES.container}>
             <Animated.View style={{
                 paddingVertical: 10,
                 shadowColor: '#000',
@@ -110,11 +130,11 @@ export default Notification = ({ navigation }) => {
                         }
                     />
                     <Button
-                        onPress={() => navigate('Setting')}
+                        onPress={() => navigate('Notification')}
                         type='clear'
                         icon={
                             <Icon
-                                name="settings"
+                                name="bell"
                                 size={20}
                                 color="#fff"
                             />
@@ -183,6 +203,7 @@ export default Notification = ({ navigation }) => {
                         />
                     </TouchableOpacity> : <ActivityIndicator color='#fff' size='large' />}
                     <Button
+                        onPress={() => navigate('Notification')}
                         type='clear'
                         icon={
                             <Icon
@@ -193,7 +214,6 @@ export default Notification = ({ navigation }) => {
                         }
                     />
                     <Button
-                        onPress={() => navigate('Setting')}
                         type='clear'
                         icon={
                             <Icon
@@ -206,36 +226,26 @@ export default Notification = ({ navigation }) => {
                 </Animated.View>
             </Animated.View>
 
-            <FlatList
-                data={notif}
-                onScroll={Animated.event(
-                    [{ nativeEvent: { contentOffset: { y: posScroll } } }]
-                )}
-                refreshing={refreshing}
-                onRefresh={() => {
-                    setRefreshing(true);
-                    setRefreshing(false);
-                }}
-                ListFooterComponent={isLoading}
-                renderItem={({ item }) => (
-                    <TouchableOpacity style={{
-                        flexDirection: 'row',
-                        paddingHorizontal: 10,
-                        paddingVertical: 10,
-                        alignItems: 'center',
-                        borderBottomWidth: 1 / 2
-                    }}>
-                        <Avatar title='IC' rounded />
-                        <View style={{
-                            marginLeft: 10
-                        }}>
-                            <Text><Text style={{ fontWeight: 'bold' }}>{item.nama}</Text> {item.sub}</Text>
-                            <Text style={{ color: '#ccc', fontSize: 10 }}>{item.time}</Text>
-                        </View>
-                    </TouchableOpacity>
-                )}
-            />
-
+            <View>
+                {
+                    list.map((item, i) => (
+                        <Button
+                            onPress={() => settingEvent(item.title)}
+                            buttonStyle={{ backgroundColor: '#eaeaea', justifyContent: 'flex-start' }}
+                            titleStyle={{ color: '#333', marginLeft: 10 }}
+                            key={i}
+                            icon={
+                                <Icon
+                                    name={item.icon}
+                                    size={15}
+                                    color="#333"
+                                />
+                            }
+                            title={item.title}
+                        />
+                    ))
+                }
+            </View>
         </View>
     );
 }

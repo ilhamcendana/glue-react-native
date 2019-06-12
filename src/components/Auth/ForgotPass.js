@@ -18,7 +18,7 @@ export default SignIn = (props) => {
             setBtnLoading(true);
             firebase.auth().sendPasswordResetEmail(email)
                 .then(() => {
-                    Alert.alert('Email sudah dikirim');
+                    Alert.alert('Email reset password telah dikirim');
                     setBtnLoading(false);
                     setEmail('');
                     navigate('SignIn');

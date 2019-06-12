@@ -7,7 +7,7 @@ export default OpenedImage = ({ navigation }) => {
     const screenWidth = Dimensions.get('window').width;
     const [IMAGEURI] = useState(navigation.state.params.imageUri);
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, backgroundColor: '#333' }}>
             <View style={{
                 alignItems: 'center',
                 paddingVertical: 10,
@@ -38,7 +38,7 @@ export default OpenedImage = ({ navigation }) => {
             <View style={{ justifyContent: 'center', width: screenWidth, flex: 1 }}>
                 <Image
                     source={{ uri: IMAGEURI }}
-                    style={{ width: '100%', height: '100%' }}
+                    style={{ width: '100%', height: 400 }}
                     PlaceholderContent={<ActivityIndicator />}
                 />
             </View>

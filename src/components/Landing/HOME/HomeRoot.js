@@ -11,15 +11,25 @@ import CreatePost from './CreatePost';
 import Trends from '../TRENDS/Trends';
 import Notification from '../NOTIFICATION/Notification';
 import Profile from '../PROFILE/Profile';
+import Setting from '../SETTINGS/Setting';
+import Info from '../SETTINGS/Info';
+import Help from '../SETTINGS/Help';
+import EditProfile from '../SETTINGS/EditProfile';
+import OpenedProfile from './OpenedProfile';
 
 const HomeStack = createStackNavigator({
     Feed: { screen: Home },
     OpenedPost: { screen: OpenedPost },
     OpenedImage: { screen: OpenedImage },
+    OpenedProfile: { screen: OpenedProfile },
     CreatePost: { screen: CreatePost },
     Trends: { screen: Trends },
     Notification: { screen: Notification },
-    Profile: { screen: Profile }
+    Profile: { screen: Profile },
+    Setting: { screen: Setting },
+    EditProfile: { screen: EditProfile },
+    Info: { screen: Info },
+    Help: { screen: Help }
 },
     {
         defaultNavigationOptions: {

@@ -16,6 +16,23 @@ export default App = () => {
     firebase.auth().onAuthStateChanged((user) => {
       SETAUTH({ isAuthenticatedReady: true, isAuthenticated: !!user });
     });
+
+    firebase.messaging().requestPermission()
+      .then(() => {
+        console.log('get permission')
+      })
+      .catch(error => {
+        console.log(error);
+      });
+
+    firebase.messaging().getToken()
+      .then(fcmToken => {
+        if (fcmToken) {
+          console.log(fcmToken);
+        } else {
+          console.log('no token');
+        }
+      });
   }, []);
 
 
