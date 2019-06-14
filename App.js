@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StatusBar } from 'react-native';
+import { View, StatusBar, Alert } from 'react-native';
 import firebase from 'react-native-firebase';
 
 //COMPONENTS
@@ -17,23 +17,35 @@ export default App = () => {
       SETAUTH({ isAuthenticatedReady: true, isAuthenticated: !!user });
     });
 
-    firebase.messaging().requestPermission()
-      .then(() => {
-        console.log('get permission')
-      })
-      .catch(error => {
-        console.log(error);
-      });
-
-    firebase.messaging().getToken()
-      .then(fcmToken => {
-        if (fcmToken) {
-          console.log(fcmToken);
-        } else {
-          console.log('no token');
-        }
-      });
+    checkPermissionNotif();
   }, []);
+
+  const checkPermissionNotif = async () => {
+    const enabled = await firebase.messaging().hasPermission();
+    if (enabled) {
+      getToken();
+    } else {
+      requestPermission();
+    }
+  }
+
+  const getToken = async () => {
+    let fcmToken = await firebase.messaging().getToken();
+    console.log(fcmToken, 'got the token ahole');
+  }
+
+  const requestPermission = async () => {
+    try {
+      await firebase.messaging().requestPermission();
+      // User has authorised
+      getToken();
+    } catch (error) {
+      // User has rejected permissions
+      console.log('permission rejected');
+    }
+  }
+
+
 
 
   if (!AUTH.isAuthenticatedReady) {

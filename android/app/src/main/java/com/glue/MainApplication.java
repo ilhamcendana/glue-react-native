@@ -1,4 +1,4 @@
-package com.glue_app;
+package com.glue;
 
 import android.app.Application;
 
