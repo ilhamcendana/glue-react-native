@@ -13,6 +13,10 @@ export default Setting = ({ navigation }) => {
             icon: 'edit'
         },
         {
+            title: 'Ubah Password',
+            icon: 'lock'
+        },
+        {
             title: 'Info',
             icon: 'info'
         },
@@ -57,6 +61,10 @@ export default Setting = ({ navigation }) => {
         switch (choosed) {
             case 'Sunting Profil':
                 navigate('EditProfile')
+                break;
+
+            case 'Ubah Password':
+                navigate('ChangePass');
                 break;
 
             case 'Info':

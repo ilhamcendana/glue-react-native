@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, KeyboardAvoidingView, Alert } from 'react-native';
+import { View, ScrollView, KeyboardAvoidingView, Alert, Image } from 'react-native';
 import { AuthStyles } from './AuthStyles';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button } from 'react-native-elements';
@@ -30,6 +30,14 @@ export default SignIn = (props) => {
             <ScrollView>
                 <KeyboardAvoidingView behavior='padding'>
                     <View style={AuthStyles.container}>
+                        <Image source={require('../../assets/glueLogo.png')}
+                            style={{
+                                width: 100,
+                                height: 100,
+                                alignSelf: 'center',
+                                marginTop: 10,
+                                borderRadius: 100 / 2
+                            }} />
                         <Text h3 style={AuthStyles.title}>GLUE</Text>
 
                         <View style={AuthStyles.formLogin}>
@@ -80,6 +88,7 @@ export default SignIn = (props) => {
                                 onPress={() => navigate('ForgotPass')} />
                             <Button title='Buat Akun' type='outline' onPress={() => navigate('SignUp')} />
                         </View>
+
                     </View>
                 </KeyboardAvoidingView>
             </ScrollView>

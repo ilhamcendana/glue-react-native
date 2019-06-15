@@ -7,6 +7,7 @@ import firebase from 'react-native-firebase';
 import { CONTEXT } from '../../Context';
 import moment from 'moment';
 import TrendsAnim from './TrendsAnim';
+import StatusAlert from './StatusAlert';
 
 
 export default OpenedPost = ({ navigation }) => {
@@ -176,6 +177,13 @@ export default OpenedPost = ({ navigation }) => {
         dbRef.get().then(snap => {
             if (snap.data().userWhoLiked[uid] !== undefined) {
                 if (snap.data().userWhoLiked[uid] === false) {
+                    if (snap.data().totalUpVote === 19) {
+                        userRef.get().then(snap => {
+                            userRef.set({
+                                profile: { totalTrends: snap.data().profile.totalTrends + 1 }
+                            }, { merge: true })
+                        })
+                    }
                     dbRef.set({
                         totalUpVote: vote + 1,
                         userWhoLiked: {
@@ -196,6 +204,13 @@ export default OpenedPost = ({ navigation }) => {
                             return setPost({ allPost: allPost })
                         })
                 } else {
+                    if (snap.data().totalUpVote === 20) {
+                        userRef.get().then(snap => {
+                            userRef.set({
+                                profile: { totalTrends: snap.data().profile.totalTrends - 1 }
+                            }, { merge: true })
+                        })
+                    }
                     dbRef.set({
                         totalUpVote: vote - 1,
                         userWhoLiked: {
@@ -216,6 +231,13 @@ export default OpenedPost = ({ navigation }) => {
                         })
                 }
             } else {
+                if (snap.data().totalUpVote === 19) {
+                    userRef.get().then(snap => {
+                        userRef.set({
+                            profile: { totalTrends: snap.data().profile.totalTrends + 1 }
+                        }, { merge: true })
+                    })
+                }
                 dbRef.set({
                     totalUpVote: vote + 1,
                     userWhoLiked: {
@@ -309,254 +331,289 @@ export default OpenedPost = ({ navigation }) => {
         });
     }
 
+    const [statusTranslate] = useState(new Animated.Value(-100));
+    const [statusStatement, setStatusStatement] = useState('');
+    const statusAnimEvent = (status) => {
+        setStatusStatement(status);
+        Animated.timing(statusTranslate, {
+            toValue: 0,
+            duration: 1000
+        }).start(() => {
+            Animated.timing(statusTranslate, {
+                toValue: -100,
+                duration: 1000,
+                delay: 1500
+            }).start()
+        })
+    }
+
 
     return (
-        <View style={{ flex: 1 }}>
-            <View style={{
-                alignItems: 'center',
-                paddingVertical: 10,
-                shadowColor: '#000',
-                shadowOpacity: .5,
-                shadowOffset: { width: 0, height: 10 },
-                elevation: 5,
-                shadowRadius: 50,
-                backgroundColor: '#4388d6',
-                height: 50,
-                position: 'relative',
-                overflow: 'hidden',
-                flexDirection: 'row'
-            }}>
-                <Button
-                    type='clear'
-                    onPress={() => navigation.goBack()}
-                    icon={
-                        <Icon name='arrow-left' color='#fff' size={25} />
-                    }
-                    buttonStyle={{ marginLeft: 5 }}
-                />
-                <Text style={{
-                    fontSize: 22, fontWeight: 'bold', marginLeft: 15, color: '#fff'
-                }}>GLUE</Text>
-            </View>
+        <>
+            <StatusAlert
+                status={statusStatement}
+                translate={statusTranslate}
+            />
 
-            {loading && !refreshing ? <ActivityIndicator color='#4388d6' size='large' style={{
-                position: 'absolute',
-                zIndex: 1000,
-                top: 100, alignSelf: 'center'
-            }} /> : null}
-
-            <ScrollView
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={_onRefresh}
+            <View style={{ flex: 1 }}>
+                <View style={{
+                    alignItems: 'center',
+                    paddingVertical: 10,
+                    shadowColor: '#000',
+                    shadowOpacity: .5,
+                    shadowOffset: { width: 0, height: 10 },
+                    elevation: 5,
+                    shadowRadius: 50,
+                    backgroundColor: '#4388d6',
+                    height: 50,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    flexDirection: 'row'
+                }}>
+                    <Button
+                        type='clear'
+                        onPress={() => navigation.goBack()}
+                        icon={
+                            <Icon name='arrow-left' color='#fff' size={25} />
+                        }
+                        buttonStyle={{ marginLeft: 5 }}
                     />
-                }>
+                    <Text style={{
+                        fontSize: 22, fontWeight: 'bold', marginLeft: 15, color: '#fff'
+                    }}>GLUE</Text>
+                </View>
 
-                {isReady ?
-                    <View style={{ paddingVertical: 10 }}>
-                        <View style={HOMESTYLES.user}>
-                            <View style={{
-                                flexDirection: 'row', alignItems: 'center',
-                            }}>
-                                <Avatar
-                                    rounded
-                                    source={{ uri: item.profilePict }}
-                                />
-                                <Text style={{ marginLeft: 10, fontSize: 20 }}>{item.nama}</Text>
-                            </View>
+                {loading && !refreshing ? <ActivityIndicator color='#4388d6' size='large' style={{
+                    position: 'absolute',
+                    zIndex: 1000,
+                    top: 100, alignSelf: 'center'
+                }} /> : null}
 
-                            <View style={{ marginTop: 10 }}>
-                                <Button
-                                    buttonStyle={{ height: 25 }}
-                                    onPress={() => morePressed(postUID, postKey)}
-                                    type='clear'
-                                    icon={
-                                        <Icon
-                                            name="more-horizontal"
-                                            size={25}
-                                            color="#000"
-                                        />
-                                    }
-                                />
-                                <Text style={{ fontSize: 10, color: '#c4c4c4' }}>
-                                    {moment(item.mergeDate, "YYYYMMDDhhmmss").fromNow()}
-                                </Text>
-                            </View>
-                        </View>
-
-                        <View style={{ marginBottom: 10 }}>
-                            {item.postPict !== '' && item.postPict !== undefined ? <View style={{ marginBottom: 10 }}>
-                                <Image source={{ uri: item.postPict }}
-                                    style={{ width: '100%', height: 200 }}
-                                />
-                            </View> : null}
-
-                            <View style={{ paddingHorizontal: 10 }}>
-                                <Text>{item.caption}</Text>
-                            </View>
-                        </View>
-
-                        <View style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            paddingHorizontal: 10,
-                            marginBottom: 10
-                        }}>
-                            <View style={{ flexDirection: 'row' }}>
-                                <Button
-                                    onPress={() => likeBtn(item.uid, item.key, item.totalUpVote)}
-                                    type='clear'
-                                    icon={
-                                        <Icon
-                                            name="heart"
-                                            size={25}
-                                            color={item.userWhoLiked ? item.userWhoLiked[firebase.auth().currentUser.uid] === true ?
-                                                '#4388d6' : '#333'
-                                                : '#333'}
-                                        />
-                                    }
-                                />
-                                {item.totalUpVote > 19 ? <Button
-                                    onPress={trendBtnEvent}
-                                    type='clear'
-                                    icon={
-                                        <Icon
-                                            name="star"
-                                            size={25}
-                                            color="#4388d6"
-                                        />
-                                    }
-                                /> : null}
-                            </View>
-
-                            <View style={{ flexDirection: 'row' }}>
-                                <Text>{item.totalUpVote} {item.totalUpVote > 1 ? 'Likes' : 'Like'}</Text>
-                                <Text> | </Text>
-                                <Text>{item.postInfo.totalComments} Komentar</Text>
-                            </View>
-                        </View>
-
-
-                        <View style={{
-                            marginBottom: 10
-                        }}>
-
-                            {
-                                listComment.map((c, i) => (
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        alignItems: 'flex-start',
-                                        borderBottomWidth: 1 / 5,
-                                        paddingVertical: 10,
-                                        paddingHorizontal: 10
-                                    }} key={i}>
-                                        <View style={{
-                                            width: '20%',
-                                        }}>
-                                            <Image source={{ uri: c.profilePict }} style={{
-                                                width: 40,
-                                                height: 40,
-                                                borderRadius: 40 / 2
-                                            }} />
-                                        </View>
-
-                                        <View style={{ width: '65%', justifyContent: 'space-between' }}>
-                                            <Text style={{ fontSize: 17, marginBottom: 3, fontWeight: '300' }} >{c.nama !== undefined ? c.nama : 'hai'}</Text>
-                                            <Text>{c.commentText}</Text>
-                                        </View>
-
-                                        <View style={{ width: '15%', }}>
-                                            <Button
-                                                onPress={() => {
-                                                    if (c.uid === firebase.auth().currentUser.uid) {
-                                                        Alert.alert('Hapus komentar', 'Anda yakin ingin menghapus komentar ini ?', [
-                                                            { text: 'Tidak' },
-                                                            {
-                                                                text: 'Ya', onPress: () => {
-                                                                    firebase.firestore().collection('comments').doc(c.commentKey)
-                                                                        .delete()
-                                                                        .then(() => {
-                                                                            const postRef = firebase.firestore().collection('posts').doc(postKey);
-                                                                            postRef.get().then(snap => {
-                                                                                postRef.set({
-                                                                                    postInfo: {
-                                                                                        totalComments: snap.data().postInfo.totalComments - 1
-                                                                                    }
-                                                                                }, { merge: true })
-                                                                            })
-                                                                        })
-                                                                        .then(() => {
-                                                                            setListComment(prev => {
-                                                                                const old = [...prev];
-                                                                                old.splice(i, 1);
-                                                                                return old;
-                                                                            });
-                                                                        })
-                                                                        .catch(err => Alert.alert('Error', err.message))
-                                                                }
-                                                            }
-                                                        ])
-                                                    }
-                                                }}
-                                                buttonStyle={{ height: 25 }}
-                                                type='clear'
-                                                icon={
-                                                    <Icon
-                                                        name="more-horizontal"
-                                                        size={25}
-                                                        color="#000"
-                                                    />
-                                                }
-                                            />
-                                            <Text style={{ fontSize: 10, color: '#c4c4c4' }}>
-                                                {moment(c.mergeDate, "YYYYMMDDhhmmss").fromNow()}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                ))
-                            }
-                        </View>
-                    </View>
-                    : null}
-            </ScrollView>
-
-            <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-evenly',
-                alignItems: 'center',
-                paddingVertical: 5,
-                backgroundColor: '#4388d6',
-            }}>
-                <TextInput multiline={true}
-                    value={commentInput}
-                    onChangeText={(e) => setCommentInput(e)}
-                    placeholder='Tulis komentar' style={{
-                        borderWidth: 1,
-                        borderRadius: 10,
-                        height: 40,
-                        width: "80%",
-                        backgroundColor: '#fff',
-                        borderColor: '#fff',
-                        paddingHorizontal: 10
-                    }} />
-                <Button
-                    onPress={commentSubmit}
-                    type='clear'
-                    buttonStyle={{ height: 40, width: 40 }}
-                    icon={
-                        <Icon
-                            name="send"
-                            size={25}
-                            color="#fff"
+                <ScrollView
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={_onRefresh}
                         />
-                    }
-                />
-            </View>
+                    }>
 
-            <TrendsAnim translate={translate} />
-        </View>
+                    {isReady ?
+                        <View style={{ paddingVertical: 10 }}>
+                            <View style={HOMESTYLES.user}>
+                                <View style={{
+                                    flexDirection: 'row', alignItems: 'center',
+                                }}>
+                                    <Avatar
+                                        rounded
+                                        source={{ uri: item.profilePict }}
+                                    />
+                                    <Text style={{ marginLeft: 10, fontSize: 20 }}>{item.nama}</Text>
+                                </View>
+
+                                <View style={{ marginTop: 10 }}>
+                                    <Button
+                                        buttonStyle={{ height: 25 }}
+                                        onPress={() => morePressed(postUID, postKey)}
+                                        type='clear'
+                                        icon={
+                                            <Icon
+                                                name="more-horizontal"
+                                                size={25}
+                                                color="#000"
+                                            />
+                                        }
+                                    />
+                                    <Text style={{ fontSize: 10, color: '#c4c4c4' }}>
+                                        {moment(item.mergeDate, "YYYYMMDDhhmmss").fromNow()}
+                                    </Text>
+                                </View>
+                            </View>
+
+                            <View style={{ marginBottom: 10 }}>
+                                {item.postPict !== '' && item.postPict !== undefined ? <View style={{ marginBottom: 10 }}>
+                                    <Image source={{ uri: item.postPict }}
+                                        style={{ width: '100%', height: 200 }}
+                                    />
+                                </View> : null}
+
+                                <View style={{ paddingHorizontal: 10 }}>
+                                    <Text>{item.caption}</Text>
+                                </View>
+                            </View>
+
+                            <View style={{
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                paddingHorizontal: 10,
+                                marginBottom: 10
+                            }}>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <Button
+                                        onPress={() => likeBtn(item.uid, item.key, item.totalUpVote)}
+                                        type='clear'
+                                        icon={
+                                            <Icon
+                                                name="heart"
+                                                size={25}
+                                                color={item.userWhoLiked ? item.userWhoLiked[firebase.auth().currentUser.uid] === true ?
+                                                    '#4388d6' : '#333'
+                                                    : '#333'}
+                                            />
+                                        }
+                                    />
+                                    {item.totalUpVote > 19 ? <Button
+                                        onPress={trendBtnEvent}
+                                        type='clear'
+                                        icon={
+                                            <Icon
+                                                name="star"
+                                                size={25}
+                                                color="#4388d6"
+                                            />
+                                        }
+                                    /> : null}
+
+                                    {item.status !== '' ? <Button
+                                        onPress={() => statusAnimEvent(item.status)}
+                                        type='clear'
+                                        icon={
+                                            <Icon
+                                                name="circle"
+                                                size={25}
+                                                color={item.status === 'Tidak relevan' ? 'red' : item.status === 'Sedang ditindak lanjuti' ? '#4388d6' : item.status === 'Sudah ditindak lanjuti' ? 'green' : '#000'}
+                                            />
+                                        }
+                                    /> : null}
+                                </View>
+
+                                <View style={{ flexDirection: 'row' }}>
+                                    <Text>{item.totalUpVote} {item.totalUpVote > 1 ? 'Likes' : 'Like'}</Text>
+                                    <Text> | </Text>
+                                    <Text>{item.postInfo.totalComments} Komentar</Text>
+                                </View>
+                            </View>
+
+
+                            <View style={{
+                                marginBottom: 10
+                            }}>
+
+                                {
+                                    listComment.map((c, i) => (
+                                        <View style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'flex-start',
+                                            borderBottomWidth: 1 / 5,
+                                            paddingVertical: 10,
+                                            paddingHorizontal: 10
+                                        }} key={i}>
+                                            <View style={{
+                                                width: '20%',
+                                            }}>
+                                                <Image source={{ uri: c.profilePict }} style={{
+                                                    width: 40,
+                                                    height: 40,
+                                                    borderRadius: 40 / 2
+                                                }} />
+                                            </View>
+
+                                            <View style={{ width: '65%', justifyContent: 'space-between' }}>
+                                                <Text style={{ fontSize: 17, marginBottom: 3, fontWeight: '300' }} >{c.nama !== undefined ? c.nama : 'hai'}</Text>
+                                                <Text>{c.commentText}</Text>
+                                            </View>
+
+                                            <View style={{ width: '15%', }}>
+                                                <Button
+                                                    onPress={() => {
+                                                        if (c.uid === firebase.auth().currentUser.uid) {
+                                                            Alert.alert('Hapus komentar', 'Anda yakin ingin menghapus komentar ini ?', [
+                                                                { text: 'Tidak' },
+                                                                {
+                                                                    text: 'Ya', onPress: () => {
+                                                                        firebase.firestore().collection('comments').doc(c.commentKey)
+                                                                            .delete()
+                                                                            .then(() => {
+                                                                                const postRef = firebase.firestore().collection('posts').doc(postKey);
+                                                                                postRef.get().then(snap => {
+                                                                                    postRef.set({
+                                                                                        postInfo: {
+                                                                                            totalComments: snap.data().postInfo.totalComments - 1
+                                                                                        }
+                                                                                    }, { merge: true })
+                                                                                })
+                                                                            })
+                                                                            .then(() => {
+                                                                                setListComment(prev => {
+                                                                                    const old = [...prev];
+                                                                                    old.splice(i, 1);
+                                                                                    return old;
+                                                                                });
+                                                                            })
+                                                                            .catch(err => Alert.alert('Error', err.message))
+                                                                    }
+                                                                }
+                                                            ])
+                                                        }
+                                                    }}
+                                                    buttonStyle={{ height: 25 }}
+                                                    type='clear'
+                                                    icon={
+                                                        <Icon
+                                                            name="more-horizontal"
+                                                            size={25}
+                                                            color="#000"
+                                                        />
+                                                    }
+                                                />
+                                                <Text style={{ fontSize: 10, color: '#c4c4c4' }}>
+                                                    {moment(c.mergeDate, "YYYYMMDDhhmmss").fromNow()}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    ))
+                                }
+                            </View>
+                        </View>
+                        : null}
+                </ScrollView>
+
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-evenly',
+                    alignItems: 'center',
+                    paddingVertical: 5,
+                    backgroundColor: '#4388d6',
+                }}>
+                    <TextInput multiline={true}
+                        value={commentInput}
+                        onChangeText={(e) => setCommentInput(e)}
+                        placeholder='Tulis komentar' style={{
+                            borderWidth: 1,
+                            borderRadius: 10,
+                            height: 40,
+                            width: "80%",
+                            backgroundColor: '#fff',
+                            borderColor: '#fff',
+                            paddingHorizontal: 10
+                        }} />
+                    <Button
+                        onPress={commentSubmit}
+                        type='clear'
+                        buttonStyle={{ height: 40, width: 40 }}
+                        icon={
+                            <Icon
+                                name="send"
+                                size={25}
+                                color="#fff"
+                            />
+                        }
+                    />
+                </View>
+
+                <TrendsAnim translate={translate} />
+            </View>
+        </>
     );
 }
 

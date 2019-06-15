@@ -10,6 +10,7 @@ import moment from 'moment';
 import Greeting from '../Greeting';
 import { ScrollView } from 'react-native-gesture-handler';
 import TrendsAnim from './TrendsAnim';
+import StatusAlert from './StatusAlert';
 
 export default Home = ({ navigation }) => {
     useEffect(() => {
@@ -49,7 +50,6 @@ export default Home = ({ navigation }) => {
                 setLoading(false);
                 setRefreshing(false);
                 setGreet(true);
-                console.log(data);
             })
             .catch(err => Alert.alert('Error', err.message))
 
@@ -159,6 +159,13 @@ export default Home = ({ navigation }) => {
         dbRef.get().then(snap => {
             if (snap.data().userWhoLiked[uid] !== undefined) {
                 if (snap.data().userWhoLiked[uid] === false) {
+                    if (snap.data().totalUpVote === 19) {
+                        userRef.get().then(snap => {
+                            userRef.set({
+                                profile: { totalTrends: snap.data().profile.totalTrends + 1 }
+                            }, { merge: true })
+                        })
+                    }
                     dbRef.set({
                         totalUpVote: vote + 1,
                         userWhoLiked: {
@@ -177,6 +184,13 @@ export default Home = ({ navigation }) => {
                             return setPost({ allPost: allPost })
                         })
                 } else {
+                    if (snap.data().totalUpVote === 20) {
+                        userRef.get().then(snap => {
+                            userRef.set({
+                                profile: { totalTrends: snap.data().profile.totalTrends - 1 }
+                            }, { merge: true })
+                        })
+                    }
                     dbRef.set({
                         totalUpVote: vote - 1,
                         userWhoLiked: {
@@ -196,6 +210,13 @@ export default Home = ({ navigation }) => {
                         })
                 }
             } else {
+                if (snap.data().totalUpVote === 19) {
+                    userRef.get().then(snap => {
+                        userRef.set({
+                            profile: { totalTrends: snap.data().profile.totalTrends + 1 }
+                        }, { merge: true })
+                    })
+                }
                 dbRef.set({
                     totalUpVote: vote + 1,
                     userWhoLiked: {
@@ -249,15 +270,36 @@ export default Home = ({ navigation }) => {
                 toValue: 200,
                 duration: 500,
                 easing: Easing.ease,
-                delay: 500
+                delay: 1500
             }).start()
         });
     }
 
+    const [statusTranslate] = useState(new Animated.Value(-100));
+    const [statusStatement, setStatusStatement] = useState('');
+    const statusAnimEvent = (status) => {
+        setStatusStatement(status);
+        Animated.timing(statusTranslate, {
+            toValue: 0,
+            duration: 1000
+        }).start(() => {
+            Animated.timing(statusTranslate, {
+                toValue: -100,
+                duration: 1000,
+                delay: 1500
+            }).start()
+        })
+    }
+
+
     return (
         <>
+            <StatusAlert
+                status={statusStatement}
+                translate={statusTranslate}
+            />
             <Greeting greet={greet}>
-                <Icon name='sun' size={100} color='#fff' />
+                <Image source={require('../../../assets/glueLogo.png')} style={{ width: 100, height: 100, borderRadius: 100 / 2 }} />
                 <Text style={{ fontWeight: '200', fontSize: 20, color: '#fff', marginTop: 20 }}>GLUE</Text>
                 <Text style={{ fontWeight: '100', fontSize: 15, color: '#fff' }}>Gunadarma Lounge</Text>
             </Greeting>
@@ -480,7 +522,7 @@ export default Home = ({ navigation }) => {
                                     </TouchableOpacity> : null}
 
                                     <View style={{ paddingHorizontal: 10 }}>
-                                        <Text>{item.caption}</Text>
+                                        <Text>{item.caption.length > 600 ? item.caption.slice(0, 600) + '...' : item.caption}</Text>
                                     </View>
                                 </View>
 
@@ -516,6 +558,18 @@ export default Home = ({ navigation }) => {
                                                 />
                                             }
                                         /> : null}
+
+                                        {item.status !== '' ? <Button
+                                            onPress={() => statusAnimEvent(item.status)}
+                                            type='clear'
+                                            icon={
+                                                <Icon
+                                                    name="circle"
+                                                    size={25}
+                                                    color={item.status === 'Tidak relevan' ? 'red' : item.status === 'Sedang ditindak lanjuti' ? '#4388d6' : item.status === 'Sudah ditindak lanjuti' ? 'green' : '#000'}
+                                                />
+                                            }
+                                        /> : null}
                                     </View>
 
                                     <View style={{ flexDirection: 'row' }}>
@@ -525,9 +579,13 @@ export default Home = ({ navigation }) => {
                                     </View>
                                 </View>
 
-                                <View style={{ paddingHorizontal: 10, marginBottom: 8 }}>
+                                <View style={{ paddingHorizontal: 10, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
                                     <Text style={{ fontSize: 12, color: '#c4c4c4' }}>
                                         {moment(item.mergeDate, "YYYYMMDDhhmmss").fromNow()}
+                                    </Text>
+
+                                    <Text style={{ fontSize: 12, color: '#c4c4c4' }}>
+                                        {item.category}
                                     </Text>
                                 </View>
 

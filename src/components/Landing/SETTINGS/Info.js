@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Linking, Animated } from 'react-native';
+import { View, Linking, Animated, Image } from 'react-native';
 import { Text, Button, } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/Feather';
 import IconFA from 'react-native-vector-icons/FontAwesome';
@@ -12,15 +12,15 @@ export default Info = ({ navigation }) => {
 
     const animate1 = () => {
         Animated.timing(rotates, {
-            toValue: 360,
-            duration: 1000
+            toValue: 1,
+            duration: 2000
         }).start(animate2);
     }
 
     const animate2 = () => {
         Animated.timing(rotates, {
             toValue: 0,
-            duration: 1000
+            duration: 2000
         }).start(animate1);
     }
 
@@ -65,8 +65,14 @@ export default Info = ({ navigation }) => {
                 alignItems: 'center',
                 marginTop: 20,
             }}>
-                <Text h4>Selamat datang</Text>
-                <Text>Di aplikasi</Text>
+                <Image source={require('../../../assets/glueLogo.png')}
+                    style={{
+                        width: 100,
+                        height: 100,
+                        alignSelf: 'center',
+                        marginTop: 10,
+                        borderRadius: 100 / 2
+                    }} />
                 <Text h4 style={{ fontWeight: 'bold', color: '#4388d6' }}>GLUE</Text>
             </View>
 

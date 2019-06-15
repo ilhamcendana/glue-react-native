@@ -44,7 +44,9 @@ export default CreatePost = ({ navigation }) => {
         key: '',
         uid: uid,
         userWhoLiked: {},
-        userWhoReported: {}
+        userWhoReported: {},
+        status: ''
+
     });
     const POSTING = () => {
         if (inputPost.category === '') return Alert.alert('INVALID', 'Categori kosong !')
@@ -104,6 +106,16 @@ export default CreatePost = ({ navigation }) => {
                         return newD;
                     })
 
+                })
+                .then(() => {
+                    const ref = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid);
+                    ref.get().then(snap => {
+                        ref.set({
+                            profile: {
+                                totalPost: snap.data().profile.totalPost + 1
+                            }
+                        }, { merge: true })
+                    })
                 })
                 .then(() => {
                     const data = { ...post };

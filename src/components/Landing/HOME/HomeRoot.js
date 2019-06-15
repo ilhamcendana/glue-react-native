@@ -16,6 +16,7 @@ import Info from '../SETTINGS/Info';
 import Help from '../SETTINGS/Help';
 import EditProfile from '../SETTINGS/EditProfile';
 import OpenedProfile from './OpenedProfile';
+import ChangePass from '../SETTINGS/ChangePass';
 
 const HomeStack = createStackNavigator({
     Feed: { screen: Home },
@@ -28,6 +29,7 @@ const HomeStack = createStackNavigator({
     Profile: { screen: Profile },
     Setting: { screen: Setting },
     EditProfile: { screen: EditProfile },
+    ChangePass: { screen: ChangePass },
     Info: { screen: Info },
     Help: { screen: Help }
 },

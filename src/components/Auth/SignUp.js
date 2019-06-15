@@ -59,7 +59,8 @@ export default SignIn = (props) => {
                             selected_jur: inputKJ.selectedJurusan,
                             totalPost: 0,
                             totalTrends: 0,
-                            totalVote: 0
+                            totalVote: 0,
+                            headerImgDB: ''
 
                         }
                     })

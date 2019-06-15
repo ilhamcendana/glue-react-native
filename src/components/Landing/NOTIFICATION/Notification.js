@@ -140,7 +140,7 @@ export default Notification = ({ navigation }) => {
                             source={{ uri: firebase.auth().currentUser.photoURL }}
                         />
                     </TouchableOpacity> : <ActivityIndicator color='#fff' size='large' />}
-                    <Text style={{ fontSize: 15, fontWeight: '100', color: '#fff' }}>Home</Text>
+                    <Text style={{ fontSize: 15, fontWeight: '100', color: '#fff' }}>Notifikasi</Text>
                 </Animated.View>
 
                 <Animated.View style={{
@@ -206,7 +206,7 @@ export default Notification = ({ navigation }) => {
                 </Animated.View>
             </Animated.View>
 
-            <FlatList
+            {/* <FlatList
                 data={notif}
                 onScroll={Animated.event(
                     [{ nativeEvent: { contentOffset: { y: posScroll } } }]
@@ -234,7 +234,20 @@ export default Notification = ({ navigation }) => {
                         </View>
                     </TouchableOpacity>
                 )}
-            />
+            /> */}
+
+            <View style={{
+                alignItems: 'center',
+                flex: 1,
+                justifyContent: 'space-around'
+            }}>
+                <Icon name='anchor' size={200} color='#4388d6' />
+                <Text style={{
+                    color: '#4388d6',
+                    fontSize: 20,
+                    fontWeight: '100'
+                }}>Notifikasi saat ini belum tersedia :(</Text>
+            </View>
 
         </View>
     );

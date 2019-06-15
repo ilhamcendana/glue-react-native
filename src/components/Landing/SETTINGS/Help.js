@@ -1,38 +1,31 @@
-import React from 'react';
-import { View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator } from 'react-native';
 import { Text, Button, } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/Feather';
-import IconFA from 'react-native-vector-icons/FontAwesome';
 import { ScrollView } from 'react-native-gesture-handler';
+import firebase from 'react-native-firebase';
 
 export default Info = ({ navigation }) => {
+    useEffect(() => {
+        setLoading(true);
+        const refre = firebase.firestore().collection('system').doc('help');
+        refre.collection('all')
+            .get().then(snap => {
+                const data = [];
+                snap.forEach(child => {
+                    data.push(child.data())
+                })
+                setContentHelp(data);
+            })
+        refre.collection('segment').doc('segment').get().then(snap => {
+            setSegment(snap.data().segment);
+        })
+            .then(() => setLoading(false));
+    }, [])
 
-    const contentHelp = [
-        {
-            title: 'Post:',
-            content: [
-                'Jika anda melihat post yang berisi kata-kata atau gambar tidak pantas,anda dapat melaporkannya dengan menekan tombol 3 titih horizontal disisi kanan post tersebut',
-                'b',
-                'c'
-            ]
-        },
-        {
-            title: 'Trends:',
-            content: [
-                'd',
-                'e',
-                'f'
-            ]
-        },
-        {
-            title: 'Profil',
-            content: [
-                'g',
-                'Jika anda melihat post yang berisi kata-kata atau gambar tidak pantas,anda dapat melaporkannya dengan menekan tombol 3 titih horizontal disisi kanan post tersebut',
-                'Jika anda melihat post yang berisi kata-kata atau gambar tidak pantas,anda dapat melaporkannya dengan menekan tombol 3 titih horizontal disisi kanan post tersebut'
-            ]
-        }
-    ]
+    const [contentHelp, setContentHelp] = useState([]);
+    const [segment, setSegment] = useState('');
+    const [loading, setLoading] = useState(true);
 
     return (
         <View style={{ flex: 1 }}>
@@ -63,44 +56,42 @@ export default Info = ({ navigation }) => {
                 }}>BANTUAN</Text>
             </View>
 
-            <ScrollView>
-                <View style={{
-                    paddingHorizontal: 20,
-                    alignItems: 'center',
-                    marginTop: 20
-                }}>
-                    <Text style={{ textAlign: 'center' }}>
-                        Aplikasi GLUE di desain untuk menampung aspirasi mahasiswa dan dosen universitas gunadarma, setiap like yang didapat dari sebuah post akan dihitung, jika jumlah like telah melewati batas maka akan masuk kedalam halaman trends dan akan muncul dihalaman admin
-                </Text>
+            {loading ? <ActivityIndicator color='#4388d6' size='large' style={{ marginVertical: 20 }} /> :
+                <ScrollView>
+                    <View style={{
+                        paddingHorizontal: 20,
+                        alignItems: 'center',
+                        marginTop: 20
+                    }}>
+                        <Text style={{ textAlign: 'justify', fontSize: 17, textTransform: 'capitalize' }}>
+                            {segment}
+                        </Text>
+                    </View>
 
-                    <Text style={{ color: 'red', textAlign: 'center' }}>
-                        Pemalsuan akun yang dilakukan akan ditindak tegas
-                </Text>
-                </View>
+                    <View style={{
+                        marginTop: 20,
+                    }}>
+                        {contentHelp.map((ch, i) => (
+                            <View key={i} style={{ paddingHorizontal: 20, marginBottom: 10 }}>
+                                <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{ch.title}:</Text>
 
-                <View style={{
-                    marginTop: 20,
-                    alignItems: 'center',
-                }}>
-                    {contentHelp.map((ch, i) => (
-                        <View key={i} style={{ width: '85%', paddingHorizontal: 10, marginBottom: 10 }}>
-                            <Text style={{ fontSize: 20 }}>{ch.title}</Text>
-
-                            <View style={{}}>
-                                {ch.content.map((c, i) => (
-                                    <View key={i} style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 }}>
-                                        <IconFA name='circle' size={10} style={{ marginTop: 5, marginRight: 5 }} />
-
-                                        <View style={{ width: '80%' }}>
-                                            <Text>{c}</Text>
-                                        </View>
+                                {ch.content.map((con, ind) => (
+                                    <View key={ind}>
+                                        <Text style={{ fontSize: 17 }}>- {con.content}</Text>
+                                        <Text style={{ fontSize: 17 }}>- {con.content2}</Text>
+                                        <Text style={{ fontSize: 17 }}>- {con.content3}</Text>
                                     </View>
+
                                 ))}
                             </View>
-                        </View>
-                    ))}
-                </View>
-            </ScrollView>
+                        ))}
+                    </View>
+
+                    <Text style={{ color: 'red', textAlign: 'justify', marginTop: 50, fontWeight: 'bold', alignSelf: 'center' }}>
+                        Pemalsuan akun akan ditindak tegas
+                </Text>
+                </ScrollView>
+            }
 
         </View>
     );

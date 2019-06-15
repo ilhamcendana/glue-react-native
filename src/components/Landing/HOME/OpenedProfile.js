@@ -514,6 +514,17 @@ export default Profile = ({ navigation }) => {
                                         />
                                     }
                                 /> : null}
+
+                                {item.status !== '' ? <Button
+                                    type='clear'
+                                    icon={
+                                        <Icon
+                                            name="circle"
+                                            size={25}
+                                            color={item.status === 'Tidak relevan' ? 'red' : item.status === 'Sedang ditindak lanjuti' ? '#4388d6' : item.status === 'Sudah ditindak lanjuti' ? 'green' : '#000'}
+                                        />
+                                    }
+                                /> : null}
                             </View>
 
                             <View style={{ flexDirection: 'row' }}>
